@@ -18,7 +18,7 @@ const routes = createBrowserRouter([
     
     {path : '/doctors/chat' , element : <ChatLayout /> , children : [
 
-        {path : '/doctors/chat' , element : <DocChat />}
+        {path : ':id' , element : <DocChat />}
 
     ]},
 

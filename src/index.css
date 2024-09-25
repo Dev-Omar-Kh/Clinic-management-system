@@ -20,6 +20,9 @@
     --text-color-2: #F3F2EC;
     --error-color: red;
 
+    --active-chat-color: rgba(243, 242, 236, 0.7);
+    --opacity-color: rgba(0, 0, 0, 0.1);
+
 }
 
 .dark_color{

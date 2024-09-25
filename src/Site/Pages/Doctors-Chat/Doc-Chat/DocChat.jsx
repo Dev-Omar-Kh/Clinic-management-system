@@ -1,27 +1,37 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useParams } from 'react-router-dom';
 import Pusher from 'pusher-js';
 
 import { HiUsers } from "react-icons/hi2";
 import { FaRegImage } from "react-icons/fa";
 import { BsSend } from "react-icons/bs";
 import { FaCheck } from "react-icons/fa6";
+import { FiLink } from "react-icons/fi";
 
 import chatCSS from './doc.module.css';
 import { motion } from 'framer-motion';
+import { fakePatients } from '../FakeUsers';
 
 export default function DocChat() {
 
+    // ====== patent-info ====== //
+
+    const {id} = useParams();
+
+    const patient = fakePatients.find(user => user.id === Number(id));
+
     // ====== manage-messages-with-pusher ====== //
 
-    const [messagesData, setMessagesData] = useState([
-        { sender: 'patient', text: "Hi, My name is omar khaled and i'm 19 years old ... i love games, anime and swimming", time: '11:59 PM' },
-        { sender: 'doctor', text: 'Hi Omar, that\'s good', time: '11:59 PM' }
-    ]);
-
+    const [messagesData, setMessagesData] = useState([]);
     const [errorMessage, setErrorMessage] = useState(null);
 
+    const [selectedImage, setSelectedImage] = useState(null);
+    const [fileType, setFileType] = useState(false);
+    const [fileName, setFileName] = useState(null);
+
     const chatEndRef = useRef(null);
+
+    // ======= pusher-connect ====== //
 
     useEffect(() => {
 
@@ -34,7 +44,11 @@ export default function DocChat() {
 
         channel.bind('message', (data) => {
 
-            setMessagesData(prevMessages => [...prevMessages, data]);
+            if(data.patientId === Number(id)) {
+
+                setMessagesData(prevMessages => [...prevMessages, data]);
+
+            }
 
         });
 
@@ -45,7 +59,22 @@ export default function DocChat() {
 
         };
 
-    } , []);
+    } , [id]);
+
+    // ====== fake-messages-users ====== //
+
+    useEffect(() => {
+
+        setMessagesData([
+
+            { patientId: Number(id), sender: 'patient', text: `Hi, My name is ${patient.name} and i'm 19 years old ... i love games, anime and swimming`, time: '11:59 PM' },
+            { patientId: Number(id), sender: 'doctor', text: `Hi ${patient.name.split(' ').slice(0 , 1)}, that's good`, time: '11:59 PM' }
+
+        ])
+
+    } , [id , patient]);
+
+    // ====== go-to-the-last-message ====== //
 
     useEffect(() => {
 
@@ -53,16 +82,24 @@ export default function DocChat() {
 
     }, [messagesData]);
 
+    // ====== send-message ====== //
+
     const sendMessage = (e) => {
 
         e.preventDefault();
 
-        if(e.target.elements.message.value.length > 0){
+        const text = e.target.elements.message.value;
+
+        if(text.length > 0 || selectedImage || fileName){
 
             const message = {
 
+                patientId: Number(id),
                 sender: 'doctor',
-                text: e.target.elements.message.value,
+                text,
+                image: selectedImage,
+                fileName: fileName,
+                fileType: fileType,
                 time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: true }),
 
             };
@@ -70,6 +107,10 @@ export default function DocChat() {
             setMessagesData(prevMessages => [...prevMessages, message]);
 
             e.target.reset();
+
+            setSelectedImage(null); 
+            setFileName(null);
+            setFileType(false)
 
         }
         else{
@@ -81,6 +122,29 @@ export default function DocChat() {
 
     };
 
+    const handleImageChange = (e) => {
+
+        const file = e.target.files[0];
+
+        if (file) {
+
+            if(file.type.startsWith('image/')){
+
+                setSelectedImage(URL.createObjectURL(file));
+
+            }
+            else{
+                setSelectedImage(null);
+                setFileType(true);
+                setFileName(file.name);
+            }
+
+        }
+
+    };
+
+    // ====== handle-enter-key ====== //
+
     const handleKeyPress = (e) => {
 
         if (e.key === 'Enter' && !e.shiftKey) {
@@ -91,6 +155,8 @@ export default function DocChat() {
         }
 
     };
+
+    // ====== context-for-display-patients ====== //
 
     const setDisplay = useOutletContext();
 
@@ -106,7 +172,7 @@ export default function DocChat() {
                         <img src={require('../../../../Images/user_img.png')} alt="" />
                     </div>
 
-                    <p className={chatCSS.m_p}>Omar Khaled Mohamed</p>
+                    <p className={chatCSS.m_p}>{patient.name}</p>
 
                 </div>
 
@@ -118,7 +184,7 @@ export default function DocChat() {
 
             <div className={chatCSS.chat_box}>
 
-                {messagesData.map((msg , idx) => <motion.div
+                {messagesData.filter(msg => msg.patientId === Number(id)).map((msg , idx) => <motion.div
                     key={idx} 
                     initial={{opacity : 0 , scale : 0.85 , y : 20}}
                     animate={{opacity : 1 , scale : 1 , y : 0}}
@@ -131,7 +197,17 @@ export default function DocChat() {
                     </div>
 
                     <div className={chatCSS.msg_content}>
-                        <p>{msg.text}</p>
+
+                        {msg.image && <img src={msg.image} alt="sent" className={chatCSS.sent_image} />}
+
+                        {msg.fileName && msg.fileType && <div className={chatCSS.file_sent}>
+
+                            <FiLink className={chatCSS.file_icon} />
+                            <p>{msg.fileName}</p>
+
+                        </div>}
+
+                        {msg.text && <p>{msg.text}</p>}
                     </div>
 
                     <div className={chatCSS.msg_ctrl}>
@@ -154,8 +230,32 @@ export default function DocChat() {
 
             <form onSubmit={sendMessage} className={chatCSS.chat_tools_box}>
 
+                {selectedImage && <motion.div 
+                    className={chatCSS.display_img}
+                    initial={{opacity : 0 , scale : 0}} animate={{opacity : 1 , scale : 1}}
+                    transition={{duration : 0.3}}
+                >
+
+                    <img src={selectedImage} alt="view_image" />
+
+                </motion.div>}
+
+                {fileName && <motion.div 
+                    className={chatCSS.check_file}
+                    initial={{opacity : 0 , scale : 0}} animate={{opacity : 1 , scale : 1}}
+                    transition={{duration : 0.3}}
+                >
+
+                    <FiLink />
+                    <p className={chatCSS.check_name}>{fileName}</p>
+
+                </motion.div>}
+
                 <div className={chatCSS.file_upload}>
-                    <FaRegImage />
+                    <label htmlFor="img">
+                        <FaRegImage />
+                        <input type="file" id='img' onChange={handleImageChange} />
+                    </label>
                 </div>
 
                 <span className={chatCSS.line}></span>
