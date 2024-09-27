@@ -1,0 +1,6 @@
+.side_bar_links.active{
+
+    color: var(--text-color-2);
+    background-color: var(--accent-color-1);
+
+}

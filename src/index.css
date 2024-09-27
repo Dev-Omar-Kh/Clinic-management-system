@@ -6,6 +6,7 @@
     margin: 0;
     box-sizing: border-box;
     text-decoration: none;
+    list-style: none;
     font-family: "Roboto", sans-serif;
 
 }
@@ -21,7 +22,10 @@
     --error-color: red;
 
     --active-chat-color: rgba(243, 242, 236, 0.7);
+    --line-color: rgba(175, 175, 175, 0.4);
+    --form-color: rgba(175, 175, 175, 0.2);
     --opacity-color: rgba(0, 0, 0, 0.1);
+    --overlay-color: rgba(0, 0, 0, 0.8);
 
 }
 

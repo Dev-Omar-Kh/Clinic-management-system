@@ -5,12 +5,21 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
 import regCss from '../../Styles/forms.module.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
+import { ThreeCircles } from 'react-loader-spinner';
+import Status from '../../Components/Common/Status/Status';
 
 export default function RegisterDoc() {
 
     // ====== send-fake-data ====== //
+
+    const [errMsg, setErrMsg] = useState(null);
+    const [visible, setVisible] = useState(true);
+    const [loading, setLoading] = useState(false)
+    const [successMsg, setSuccessMsg] = useState(null);
+
+    const navigate = useNavigate();
 
     const values = {
 
@@ -25,6 +34,19 @@ export default function RegisterDoc() {
     }
 
     const regSubmit = (values) => {
+
+        setErrMsg(null);
+        setSuccessMsg(null);
+        setLoading(true);
+
+        setTimeout(() => {
+            setLoading(false);
+            setSuccessMsg('Account created successfully');
+        }, 1500);
+
+        setTimeout(() => {
+            navigate('/loginDoc')
+        }, 5300);
 
         console.log(values);
 
@@ -144,6 +166,9 @@ export default function RegisterDoc() {
 
     return <React.Fragment>
 
+        {successMsg ? <Status icon='success' isVisible={visible} visibility={setVisible} data={successMsg} /> : ''}
+        {errMsg ? <Status icon='error' isVisible={visible} visibility={setVisible} data={errMsg} /> : ''}
+
         <motion.div variants={parentVariants} initial='hidden' animate='visible' className={regCss.container}>
 
             <motion.h3 variants={toBottomVariants} className={regCss.h3}>Doctor register</motion.h3>
@@ -153,7 +178,7 @@ export default function RegisterDoc() {
                 variants={toTopVariants} className={regCss.form}
             >
 
-                <div className={regCss.input_cont + ' ' + regCss.half_cont}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={regCss.input_cont + ' ' + regCss.half_cont}>
 
                     <div className={regCss.loader}></div>
 
@@ -177,7 +202,7 @@ export default function RegisterDoc() {
 
                 </div>
 
-                <div className={regCss.input_cont + ' ' + regCss.half_cont}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={regCss.input_cont + ' ' + regCss.half_cont}>
 
                     <div className={regCss.loader}></div>
 
@@ -201,7 +226,7 @@ export default function RegisterDoc() {
 
                 </div>
 
-                <div className={regCss.input_cont}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={regCss.input_cont}>
 
                     <div className={regCss.loader}></div>
 
@@ -225,7 +250,7 @@ export default function RegisterDoc() {
 
                 </div>
 
-                <div className={regCss.input_cont + ' ' + regCss.half_cont}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={regCss.input_cont + ' ' + regCss.half_cont}>
 
                     <div className={regCss.loader}></div>
 
@@ -249,7 +274,7 @@ export default function RegisterDoc() {
 
                 </div>
 
-                <div className={regCss.input_cont + ' ' + regCss.half_cont}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={regCss.input_cont + ' ' + regCss.half_cont}>
 
                     <div className={regCss.loader}></div>
 
@@ -273,7 +298,7 @@ export default function RegisterDoc() {
 
                 </div>
 
-                <div className={regCss.input_cont + ' ' + regCss.half_cont}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={regCss.input_cont + ' ' + regCss.half_cont}>
 
                     <div className={regCss.eyes_cont} onClick={() => setEyeCont1(!eyeCont1)}>
                         <AnimatePresence>
@@ -309,7 +334,7 @@ export default function RegisterDoc() {
 
                 </div>
 
-                <div className={regCss.input_cont + ' ' + regCss.half_cont}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={regCss.input_cont + ' ' + regCss.half_cont}>
 
                     <div className={regCss.eyes_cont} onClick={() => setEyeCont2(!eyeCont2)}>
                         <AnimatePresence>
@@ -345,9 +370,11 @@ export default function RegisterDoc() {
 
                 </div>
 
-                <Link to={'/loginDoc'} className={regCss.login_link}>Do you already have an account ?</Link>
+                <Link style={{opacity : loading ? 0.6 : 1}} to={'/loginDoc'} className={regCss.login_link}>
+                    Do you already have an account ?
+                </Link>
 
-                <div className={regCss.navigate_forms}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={regCss.navigate_forms}>
 
                     <p>Go to registration :</p>
                     <Link to={'/registerUser'}>As a User</Link>
@@ -355,7 +382,18 @@ export default function RegisterDoc() {
 
                 </div>
 
-                <motion.button whileTap={{scale : 0.98}} className={regCss.submit} type='submit'>Submit</motion.button>
+                <motion.button 
+                    style={{opacity : loading ? 0.6 : 1}} 
+                    whileTap={{scale : 0.98}} 
+                    className={regCss.submit} type='submit'
+                >
+                    {loading ? <ThreeCircles
+                        visible={true} height="20" width="20" color="var(--text-color-2)"
+                        ariaLabel="three-circles-loading" wrapperStyle={{}} wrapperClass=""
+                        /> : 
+                        'Submit'
+                    }
+                </motion.button>
 
             </motion.form>
 

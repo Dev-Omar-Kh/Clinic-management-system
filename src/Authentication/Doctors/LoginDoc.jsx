@@ -5,12 +5,21 @@ import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined';
 import VisibilityOffOutlinedIcon from '@mui/icons-material/VisibilityOffOutlined';
 
 import logCSS from '../../Styles/forms.module.css';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useFormik } from 'formik';
+import { ThreeCircles } from 'react-loader-spinner';
+import Status from '../../Components/Common/Status/Status';
 
 export default function LoginDoc() {
 
     // ====== send-fake-data ====== //
+
+    const [errMsg, setErrMsg] = useState(null);
+    const [visible, setVisible] = useState(true);
+    const [loading, setLoading] = useState(false)
+    const [successMsg, setSuccessMsg] = useState(null);
+
+    const navigate = useNavigate();
 
     const values = {
 
@@ -20,6 +29,21 @@ export default function LoginDoc() {
     }
 
     const logSubmit = (values) => {
+
+        sessionStorage.setItem('f_tkn' , 'doctor');
+
+        setErrMsg(null);
+        setSuccessMsg(null);
+        setLoading(true);
+
+        setTimeout(() => {
+            setLoading(false);
+            setSuccessMsg('Welcome on site as doctor');
+        }, 1500);
+
+        setTimeout(() => {
+            navigate('/doctors/chat/1')
+        }, 5300);
 
         console.log(values);
 
@@ -94,6 +118,9 @@ export default function LoginDoc() {
 
     return <React.Fragment>
 
+        {successMsg ? <Status icon='success' isVisible={visible} visibility={setVisible} data={successMsg} /> : ''}
+        {errMsg ? <Status icon='error' isVisible={visible} visibility={setVisible} data={errMsg} /> : ''}
+
         <motion.div variants={parentVariants} initial='hidden' animate='visible' className={logCSS.container}>
 
             <motion.h3 variants={toBottomVariants} className={logCSS.h3}>Doctor Login</motion.h3>
@@ -103,7 +130,7 @@ export default function LoginDoc() {
                 variants={toTopVariants} className={logCSS.form}
             >
 
-                <div className={logCSS.input_cont}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={logCSS.input_cont}>
 
                     <div className={logCSS.loader}></div>
 
@@ -127,7 +154,7 @@ export default function LoginDoc() {
 
                 </div>
 
-                <div className={logCSS.input_cont}>
+                <div style={{opacity : loading ? 0.6 : 1}} className={logCSS.input_cont}>
 
                     <div className={logCSS.eyes_cont} onClick={() => setEyeCont1(!eyeCont1)}>
                         <AnimatePresence>
@@ -163,9 +190,22 @@ export default function LoginDoc() {
 
                 </div>
 
-                <Link to={'/registerDoctor'} className={logCSS.login_link}>Don't have an account ?</Link>
+                <Link style={{opacity : loading ? 0.6 : 1}} to={'/registerDoctor'} className={logCSS.login_link}>
+                    Don't have an account ?
+                </Link>
 
-                <motion.button whileTap={{scale : 0.98}} className={logCSS.submit} type='submit'>Submit</motion.button>
+                <motion.button 
+                    style={{opacity : loading ? 0.6 : 1}} 
+                    whileTap={{scale : 0.98}} 
+                    className={logCSS.submit} type='submit'
+                >
+                    {loading ? <ThreeCircles
+                        visible={true} height="20" width="20" color="var(--text-color-2)"
+                        ariaLabel="three-circles-loading" wrapperStyle={{}} wrapperClass=""
+                        /> : 
+                        'Submit'
+                    }
+                </motion.button>
 
             </motion.form>
 
